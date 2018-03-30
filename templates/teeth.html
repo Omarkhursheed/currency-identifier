@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+
+<html>
+<title>Teeth</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link type="text/css" href="{{ url_for('static', filename='css/w3.css') }}" rel="stylesheet"/>
+<link type="text/css" href="{{ url_for('static', filename='css/font-awesome.min.css') }}" rel="stylesheet"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+
+<style>
+body {font-family: "Lato", sans-serif}
+.mySlides {display: none}
+</style>
+
+<style>
+    video, img {
+      max-width:100%;
+    }
+</style>
+
+<script type="text/javascript" src="{{ url_for('static', filename='reimgteeth.js') }}"></script>
+
+<script>
+var isChrome = !!window.chrome && !!window.chrome.webstore;
+var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
+
+if (isChrome || isSafari) {
+
+  navigator.getUserMedia({video: true}, function(stream) {
+        var video = document.getElementById("v");
+        var canvas = document.getElementById("c");
+        var button = document.getElementById("b");
+        video.srcObject = stream;
+        video.play();
+        button.disabled = false;
+        button.onclick = function() {
+        canvas.getContext("2d").drawImage(video, 10, 10);
+
+        var img = canvas.toDataURL("image/png");
+        img = img.replace(/^data:image\/[^;]*/, 'data:application/octet-stream');
+
+        ReImg.fromCanvas(document.querySelector('canvas')).downloadPng();
+
+        //window.location.href=img;
+
+        };
+
+        }, function(err) { alert("there was an error " + err)});
+
+}
+else
+{
+  document.getElementById("videostuff").style.display='none';
+}
+</script>
+
+<body>
+
+<!-- Navbar -->
+<div class="w3-top">
+  <div class="w3-bar w3-black w3-card">
+    <a class="w3-bar-item w3-button w3-padding-large w3-hide-medium w3-hide-large w3-right" href="javascript:void(0)" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
+
+    <a href="/" class="w3-bar-item w3-button w3-padding-large">HOME</a>
+    <a href="/identify-currency" class="w3-bar-item w3-button w3-padding-large w3-hide-small">IDENTIFIER</a>
+  
+ </div>
+</div>
+
+<!-- Page content -->
+<div class="w3-content" style="max-width:2000px;margin-top:46px">
+
+  <!-- TAB1 Section -->
+  <div class="w3-container w3-content w3-center w3-padding-64" style="max-width:800px" id="tab1">
+    <h2 class="w3-wide">Currency File</h2>
+    <p class="w3-opacity"><i>Select Currency File</i></p>
+
+    <fieldset><legend>Select Button: </legend>
+
+        <form method=post action="/teethupload" enctype=multipart/form-data>
+        <input type="file" name="image" id="image" accept="image/*" capture="camera"/>
+        <input type=submit value=Upload>
+        </form>
+
+    </fieldset>
+
+    <div id="videostuff">
+    <fieldset><legend>Select Button: </legend>
+    <form method=post action="/teethupload" enctype=multipart/form-data>
+    <video id="v" width="300" height="300"></video>
+    <input id="b" type="button" disabled="true" value="Take Picture"></input>
+    <canvas id="c" style="display:none;" width="630" height="500"></canvas>
+    </form>
+
+    <form method=post action="/teethuploadcam">
+        <input type=submit value="Upload File">
+    </form>
+    </fieldset>
+    </div>
+
+  </div>
+  
+<!-- End Page Content -->
+</div>
+
+</body>
+</html>

@@ -1,6 +1,6 @@
 
-Evaluation time (1-image): 0.232s
+Evaluation time (1-image): 0.196s
 
-indian rupee 0.5496002
-us dollar 0.41957957
-saudi riyal 0.030820265
+indian rupee 0.43941775
+us dollar 0.3201724
+saudi riyal 0.24040978

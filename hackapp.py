@@ -25,7 +25,28 @@ def setup_database():
 	mysql.init_app(app)
 
 
-@app.route('/identify-currency',methods=['POST','GET'])
+def query_db(query):
+	query_string = """\
+SELECT NAME, INFO, EXCHANGE_RATE from currency
+WHERE NAME="{0}";""".format(query)
+	conn = mysql.connect().cursor()
+	conn.execute(query_string)
+	out =  conn.fetchall()
+	result = [(name, info, exchange_rate) for (name, info, exchange_rate) in out]
+	x = result[0][0]
+	y = result[0][1]
+	z = result[0][2]
+	if(x == 'us dollar'):
+		x = 'US Dollar'
+	elif(x == "indian rupee"):
+		x = "Indian Rupee"
+	elif(x == "saudi riyal"):
+		x = "Saudi Riyal"
+	return x, y, z
+
+
+
+@app.route('/identify-currency', methods=['POST','GET'])
 def teeth():
 
 	for f in glob.glob("/Users/omarkhursheed/Downloads/img*.png"):
@@ -42,10 +63,10 @@ def teethuploadcam():
 		
 		for f in glob.glob("/Users/omarkhursheed/Downloads/img*.png"):
 			temp = f
-		
+
 		print(temp)
 		f = os.path.join(app.config['UPLOAD_FOLDER']+'/tf_files/', 'img.png')
-		shutil.move(temp,os.path.join(app.config['UPLOAD_FOLDER']+'/tf_files/')+'img.png')
+		shutil.move(temp, os.path.join(app.config['UPLOAD_FOLDER']+'/tf_files/')+'img.png')
 
 		subprocess.call("bash predict.sh png > result.txt", shell=True)
 		filename = "result.txt"
@@ -54,27 +75,7 @@ def teethuploadcam():
 			x = file.readlines()
 		query = x[3].split(' ')[0]+' '+x[3].split(' ')[1]
 		print(query)
-
-		query_string = """\
-		SELECT NAME, INFO, EXCHANGE_RATE from currency
-		WHERE NAME="{0}";""".format(query)
-		conn = mysql.connect().cursor()
-		conn.execute(query_string)
-		out =  conn.fetchall()
-		print(out)
-		result = [(name, info, exchange_rate) for (name, info, exchange_rate) in out]
-		x = result[0][0]
-		y = result[0][1]
-		z = result[0][2]
-		if(x == 'us dollar'):
-			x = 'US Dollar'
-		elif(x == "indian rupee"):
-			x = "Indian Rupee"
-		elif(x == "saudi riyal"):
-			x = "Saudi Riyal"
-		print (x)
-		print (y)
-		print (z)
+		x, y, z = query_db(query)
 		return render_template("result.html", x=x, y=y, z=z)
 
 @app.route('/teethupload',methods=['POST','GET'])
@@ -94,15 +95,8 @@ def teethupload():
 
 		x = file.readlines()
 		query = x[3].split(' ')[0]+' '+x[3].split(' ')[1]
-		conn = sqlite3.connect('currency.db')
-		query_string = """\
-		SELECT NAME, INFO, EXCHANGE_RATE from CURRENCY
-		WHERE NAME="{0}";""".format(query)
-		out = conn.execute(query_string)
-		print(out)
-		result = [(name, info, exchange_rate) for (name, info, exchange_rate) in out]
-		print(result)
-		return render_template("result.html", result=result)
+		x, y, z = query_db(query)
+		return render_template("result.html", x=x, y=y, z=z)
 		#return render_template("result.html", result=y)
 
 @app.route('/')

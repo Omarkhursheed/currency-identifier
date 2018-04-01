@@ -1,21 +1,12 @@
 from flask import Flask, render_template, redirect, url_for, request
-from flask_table import Table, Col
+from flaskext.mysql import MySQL
 from os import listdir
 from os.path import isfile, join
+
 import os, os.path
-import numpy as np
-import pandas as pd
-import time, datetime
 import subprocess
-import pickle
-import sqlite3
-import math
-from tkinter.filedialog import askopenfilename
-from shutil import copyfile
-from werkzeug import secure_filename
+import time, datetime
 import glob, shutil
-from sys import platform
-from flaskext.mysql import MySQL
 
 app = Flask(__name__)
 

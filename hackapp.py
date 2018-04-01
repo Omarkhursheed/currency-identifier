@@ -15,6 +15,7 @@ from shutil import copyfile
 from werkzeug import secure_filename
 import glob, shutil
 from sys import platform
+from flaskext.mysql import MySQL
 
 app = Flask(__name__)
 
@@ -22,6 +23,15 @@ UPLOAD_FOLDER = os.path.dirname(os.path.abspath(__file__))
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 dname = os.path.dirname(os.path.abspath(__file__))
+
+def setup_database():
+	global mysql
+	mysql = MySQL()
+	app.config['MYSQL_DATABASE_USER'] = 'omarkhursheed'
+	app.config['MYSQL_DATABASE_PASSWORD'] = 'balloon16'
+	app.config['MYSQL_DATABASE_DB'] = 'currency'
+	app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+	mysql.init_app(app)
 
 
 @app.route('/identify-currency',methods=['POST','GET'])
@@ -32,6 +42,7 @@ def teeth():
 	for f in glob.glob("/Users/omarkhursheed/Hack36/tf_files/img*.png") :
 		os.remove(f)
 	return render_template("teeth.html")
+
 
 @app.route('/teethuploadcam',methods=['POST','GET'])
 def teethuploadcam():
@@ -52,15 +63,28 @@ def teethuploadcam():
 			x = file.readlines()
 		query = x[3].split(' ')[0]+' '+x[3].split(' ')[1]
 		print(query)
-		conn = sqlite3.connect('currency.db')
+
 		query_string = """\
-		SELECT NAME, INFO, EXCHANGE_RATE from CURRENCY
+		SELECT NAME, INFO, EXCHANGE_RATE from currency
 		WHERE NAME="{0}";""".format(query)
-		out = conn.execute(query_string)
+		conn = mysql.connect().cursor()
+		conn.execute(query_string)
+		out =  conn.fetchall()
 		print(out)
 		result = [(name, info, exchange_rate) for (name, info, exchange_rate) in out]
-		print(result)
-		return render_template("result.html", result=result)
+		x = result[0][0]
+		y = result[0][1]
+		z = result[0][2]
+		if(x == 'us dollar'):
+			x = 'US Dollar'
+		elif(x == "indian rupee"):
+			x = "Indian Rupee"
+		elif(x == "saudi riyal"):
+			x = "Saudi Riyal"
+		print (x)
+		print (y)
+		print (z)
+		return render_template("result.html", x=x, y=y, z=z)
 
 @app.route('/teethupload',methods=['POST','GET'])
 def teethupload():
@@ -104,4 +128,5 @@ def dated_url_for(endpoint, **values):
     return url_for(endpoint, **values)
 
 if __name__ == '__main__':
+	setup_database()
 	app.run(debug = True)
